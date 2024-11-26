@@ -47,7 +47,7 @@ $time = date("h:i A"); // Time format (12-hour with AM/PM)
 <body>
 
     <div class="container">
-        <h1>My name is Nayeli</h1>
+        <h1>My name is Nayeli c</h1>
         <div class="time">The time is: <?php echo $time; ?></div>
     </div>
 
