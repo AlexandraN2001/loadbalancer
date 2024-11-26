@@ -30,5 +30,5 @@ jobs:
         script: |
           cd webSite2
           git pull origin main
-          sudo mv index.php /var/www/html/
+          sudo mv index.html /var/www/html/
         
