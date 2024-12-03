@@ -29,15 +29,17 @@ jobs:
       - name: Deploy to EC2 instances
         run: |
           for host in $(echo "${{ secrets.HOST_DNS_PROD }}" | tr "," "\n"); do
-            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$host << 'EOF'
-              sudo yum install -y git
-              
-              cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git
-              cd loadbalancer
-              git pull origin main 
-              
-              sudo cp index.html /usr/share/nginx/html/
-              
-              sudo systemctl restart nginx
-            EOF
-          done
+  ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$host << 'EOF'
+    sudo yum install -y git
+    
+    cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git
+    cd loadbalancer
+    
+    git pull origin qa
+    
+    sudo cp index.html /usr/share/nginx/html/
+    
+    sudo systemctl restart nginx
+  EOF
+done
+
