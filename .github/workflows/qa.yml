@@ -1,9 +1,9 @@
-name: Deploy to EC2 (Production)
+name: Deploy to EC2 (QA)
 
 on:
   push:
     branches:
-      - main  
+      - qa
 
 jobs:
   deploy:
@@ -18,26 +18,23 @@ jobs:
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY_PROD }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_KEY_QA }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           # Add IPs from the comma-separated list
-          for host in $(echo "${{ secrets.HOST_DNS_PROD }}" | tr "," "\n"); do
+          for host in $(echo "${{ secrets.HOST_DNS_QA }}" | tr "," "\n"); do
             ssh-keyscan -H $host >> ~/.ssh/known_hosts
           done
 
       # Step 3: Iterate over instances and deploy
       - name: Deploy to EC2 instances
         run: |
-          for host in $(echo "${{ secrets.HOST_DNS_PROD }}" | tr "," "\n"); do
+          for host in $(echo "${{ secrets.HOST_DNS_QA }}" | tr "," "\n"); do
             ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$host << 'EOF'
               sudo yum install -y git
-              
               cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git
               cd loadbalancer
-              git pull origin main 
-              
+              git pull origin qa         
               sudo cp index.html /usr/share/nginx/html/
-              
               sudo systemctl restart nginx
             EOF
           done
