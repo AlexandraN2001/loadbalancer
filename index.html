@@ -21,7 +21,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            width: 350px;
         }
 
         h1 {
@@ -30,11 +30,18 @@
             margin-bottom: 10px;
         }
 
-        .time {
+        .time, .ip {
             font-size: 20px;
-            color: #FF5722; /* Orange color for the time */
             margin-top: 10px;
             font-weight: bold;
+        }
+
+        .time {
+            color: #FF5722; /* Orange color for the time */
+        }
+
+        .ip {
+            color: #2196F3; /* Blue color for the IP */
         }
     </style>
 </head>
@@ -42,8 +49,19 @@
 
     <div class="container">
         <h1>My name is Alexandra Cabrera</h1>
-        <div class="time">The time is: 02:30 PM</div>
+        <div class="time" id="time">The time is: Loading...</div>
     </div>
+
+    <script>
+        // Update time dynamically
+        function updateTime() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            document.getElementById('time').textContent = 'The time is: ' + now.toLocaleTimeString('en-US', options);
+        }
+        setInterval(updateTime, 1000); // Update every second
+        updateTime();
+    </script>
 
 </body>
 </html>
