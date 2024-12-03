@@ -28,22 +28,22 @@ jobs:
       # Step 3: Iterate over instances and deploy
       - name: Deploy to EC2 instances
         run: |
-         for host in $(echo "${{ secrets.HOST_DNS_PROD }}" | tr "," "\n"); do
-  ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$host << EOF
-  
-    sudo yum install -y git
-    
-    
-    cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git
-    cd loadbalancer
-    
-  
-    git pull origin qa
-    
-    
-    sudo cp index.html /usr/share/nginx/html/
-    
-   
-    sudo systemctl restart nginx
-  EOF
-done
+          for host in $(echo "${{ secrets.HOST_DNS_PROD }}" | tr "," "\n"); do
+            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$host << 'EOF'
+              # Install git if it's not already installed
+              sudo yum install -y git
+              
+              # Navigate to the target directory or clone the repository
+              cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git
+              cd loadbalancer
+              
+              # Pull latest changes from the 'qa' branch
+              git pull origin qa
+              
+              # Copy index.html to the nginx directory
+              sudo cp index.html /usr/share/nginx/html/
+              
+              # Restart nginx service to apply the changes
+              sudo systemctl restart nginx
+            EOF
+          done
