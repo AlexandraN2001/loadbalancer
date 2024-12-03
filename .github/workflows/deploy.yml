@@ -30,19 +30,22 @@ jobs:
         run: |
           for host in $(echo "${{ secrets.HOST_DNS_PROD }}" | tr "," "\n"); do
             ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$host << 'EOF'
-              # Install git if it's not already installed
-              sudo yum install -y git
-              
-              # Navigate to the target directory or clone the repository
+              # Install git and nginx if not already installed
+              sudo yum install -y git nginx
+
+              # Create target directory if it does not exist
+              mkdir -p ${{ secrets.TARGET_DIR }}
+
+              # Navigate to the target directory or clone the repository if not present
               cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git
               cd loadbalancer
-              
+
               # Pull latest changes from the 'qa' branch
               git pull origin qa
-              
+
               # Copy index.html to the nginx directory
               sudo cp index.html /usr/share/nginx/html/
-              
+
               # Restart nginx service to apply the changes
               sudo systemctl restart nginx
             EOF
