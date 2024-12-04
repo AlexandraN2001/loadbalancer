@@ -30,7 +30,7 @@ jobs:
       - name: Deploy to EC2 instances
         run: |
           for HOST_DNS in ${{ secrets.HOST_DNS_PROD_1 }} ${{ secrets.HOST_DNS_PROD_2 }} ${{ secrets.HOST_DNS_PROD_3 }} ${{ secrets.HOST_DNS_PROD_4 }}; do
-            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$HOST_DNS << 'EOF'
+            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$HOST_DNS <<EOF
               # Install nginx and git if not installed
               if ! command -v nginx &> /dev/null; then
                 sudo dnf install nginx -y
