@@ -44,7 +44,9 @@ jobs:
               sudo systemctl enable nginx
 
               # Clone the repository if it doesn't exist
-              cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git ${{ secrets.TARGET_DIR }}
+              if [ ! -d "${{ secrets.TARGET_DIR }}" ]; then
+                git clone https://github.com/AlexandraN2001/loadbalancer.git ${{ secrets.TARGET_DIR }}
+              fi
               cd ${{ secrets.TARGET_DIR }}
 
               # Pull the latest changes from the main branch
