@@ -30,8 +30,9 @@ jobs:
       - name: Deploy to EC2 instances
         run: |
           for HOST_DNS in ${{ secrets.HOST_DNS_PROD_1 }} ${{ secrets.HOST_DNS_PROD_2 }} ${{ secrets.HOST_DNS_PROD_3 }} ${{ secrets.HOST_DNS_PROD_4 }}; do
-            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$HOST_DNS <<EOF
-              # Install nginx and git if not installed
+            # Ejecutar comandos en cada EC2
+            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$HOST_DNS << 'SCRIPT'
+              # Instalar nginx y git si no están instalados
               if ! command -v nginx &> /dev/null; then
                 sudo dnf install nginx -y
               fi
@@ -39,21 +40,23 @@ jobs:
                 sudo dnf install git -y
               fi
 
-              # Ensure nginx is running
+              # Asegurar que nginx esté corriendo
               sudo systemctl start nginx
               sudo systemctl enable nginx
 
-              # Clone the repository if it doesn't exist
-              cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git ${{ secrets.TARGET_DIR }}
+              # Clonar el repositorio si no existe
+              if [ ! -d "${{ secrets.TARGET_DIR }}" ]; then
+                git clone https://github.com/AlexandraN2001/loadbalancer.git ${{ secrets.TARGET_DIR }}
+              fi
               cd ${{ secrets.TARGET_DIR }}
 
-              # Pull the latest changes from the main branch
+              # Hacer pull de los últimos cambios desde la rama main
               git pull origin main
 
-              # Copy index.html to nginx's default directory
+              # Copiar index.html al directorio por defecto de nginx
               sudo cp index.html /usr/share/nginx/html/
 
-              # Restart nginx to apply the changes
+              # Reiniciar nginx para aplicar los cambios
               sudo systemctl restart nginx
-            EOF
+            SCRIPT
           done
