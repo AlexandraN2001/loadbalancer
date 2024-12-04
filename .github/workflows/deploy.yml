@@ -1,4 +1,4 @@
-name: Deploy to EC2 (Production)
+name: Deploy to EC2 (Desarrollo)
 
 on:
   push:
@@ -10,50 +10,104 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Paso 1: Hacer checkout del repositorio
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Step 2: Configure the SSH key to connect to the EC2 instances
+      # Paso 2: Configurar la clave SSH para conectar con las instancias EC2
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY_PROD }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ec2-34-207-119-238.compute-1.amazonaws.com >> ~/.ssh/known_hosts
+          ssh-keyscan -H ec2-54-226-105-118.compute-1.amazonaws.com >> ~/.ssh/known_hosts
+          ssh-keyscan -H ec2-3-94-248-188.compute-1.amazonaws.com >> ~/.ssh/known_hosts
+          ssh-keyscan -H ec2-54-146-243-56.compute-1.amazonaws.com >> ~/.ssh/known_hosts
+          ssh-keyscan -H ec2-44-221-168-140.compute-1.amazonaws.com >> ~/.ssh/known_hosts
+          ssh-keyscan -H ec2-98-85-158-95.compute-1.amazonaws.com >> ~/.ssh/known_hosts
 
-          # Add all EC2 host DNS addresses to known_hosts
-          for HOST_DNS in ${{ secrets.HOST_DNS_PROD_1 }} ${{ secrets.HOST_DNS_PROD_2 }} ${{ secrets.HOST_DNS_PROD_3 }} ${{ secrets.HOST_DNS_PROD_4 }}; do
-            ssh-keyscan -H "$HOST_DNS" >> ~/.ssh/known_hosts
-          done
-
-      # Step 3: Deploy to each EC2 instance
-      - name: Deploy to EC2 instances
+      # Paso 3: Desplegar en las instancias de desarrollo
+      - name: Deploy to Desarrollo1
         run: |
-          for HOST_DNS in ${{ secrets.HOST_DNS_PROD_1 }} ${{ secrets.HOST_DNS_PROD_2 }} ${{ secrets.HOST_DNS_PROD_3 }} ${{ secrets.HOST_DNS_PROD_4 }}; do
-            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$HOST_DNS << 'EOF'
-              # Install nginx and git if not installed
-              if ! command -v nginx &> /dev/null; then
-                sudo dnf install nginx -y
-              fi
-              if ! command -v git &> /dev/null; then
-                sudo dnf install git -y
-              fi
+          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_SSH_KEY }}" ec2-user@ec2-34-207-119-238.compute-1.amazonaws.com << 'EOF'
+            cd /home/ec2-user/loadbalancer || git clone https://github.com/AlexandraN2001/loadbalancer.git
+            cd loadbalancer
+            git pull origin main
+            sudo cp index.html /var/www/html/
+            sudo chown -R ec2-user:ec2-user /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo systemctl restart nginx
+          EOF
 
-              # Ensure nginx is running
-              sudo systemctl start nginx
-              sudo systemctl enable nginx
+      - name: Deploy to Desarrollo2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_SSH_KEY }}" ec2-user@ec2-54-226-105-118.compute-1.amazonaws.com << 'EOF'
+            cd /home/ec2-user/loadbalancer || git clone https://github.com/AlexandraN2001/loadbalancer.git
+            cd loadbalancer
+            git pull origin main
+            sudo cp index.html /var/www/html/
+            sudo chown -R ec2-user:ec2-user /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo systemctl restart nginx
+          EOF
 
-              # Clone the repository if it doesn't exist
-              cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git ${{ secrets.TARGET_DIR }}
-              cd ${{ secrets.TARGET_DIR }}
+      # Paso 4: Desplegar en las instancias de producción
+      - name: Deploy to Production1
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_SSH_KEY }}" ec2-user@ec2-3-94-248-188.compute-1.amazonaws.com << 'EOF'
+            cd /home/ec2-user/loadbalancer || git clone https://github.com/AlexandraN2001/loadbalancer.git
+            cd loadbalancer
+            git pull origin main
+            sudo cp index.html /var/www/html/
+            sudo chown -R ec2-user:ec2-user /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo systemctl restart nginx
+          EOF
 
-              # Pull the latest changes from the main branch
-              git pull origin main
+      - name: Deploy to Production2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_SSH_KEY }}" ec2-user@ec2-54-146-243-56.compute-1.amazonaws.com << 'EOF'
+            cd /home/ec2-user/loadbalancer || git clone https://github.com/AlexandraN2001/loadbalancer.git
+            cd loadbalancer
+            git pull origin main
+            sudo cp index.html /var/www/html/
+            sudo chown -R ec2-user:ec2-user /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo systemctl restart nginx
+          EOF
 
-              # Copy index.html to nginx's default directory
-              sudo cp index.html /usr/share/nginx/html/
+      - name: Deploy to Production3
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_SSH_KEY }}" ec2-user@ec2-44-221-168-140.compute-1.amazonaws.com << 'EOF'
+            cd /home/ec2-user/loadbalancer || git clone https://github.com/AlexandraN2001/loadbalancer.git
+            cd loadbalancer
+            git pull origin main
+            sudo cp index.html /var/www/html/
+            sudo chown -R ec2-user:ec2-user /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo systemctl restart nginx
+          EOF
 
-              # Restart nginx to apply the changes
-              sudo systemctl restart nginx
-            EOF
-          done
+      - name: Deploy to Production4
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_SSH_KEY }}" ec2-user@ec2-98-85-158-95.compute-1.amazonaws.com << 'EOF'
+            cd /home/ec2-user/loadbalancer || git clone https://github.com/AlexandraN2001/loadbalancer.git
+            cd loadbalancer
+            git pull origin main
+            sudo cp index.html /var/www/html/
+            sudo chown -R ec2-user:ec2-user /var/www/html
+            sudo chmod -R 755 /var/www/html
+            sudo systemctl restart nginx
+          EOF
+
+      # Paso 5: Disparar el flujo de trabajo 'qa.yml' en el repositorio
+      - name: Trigger QA workflow
+        uses: peter-evans/workflow-dispatch@v1
+        with:
+          repository: AlexandraN2001/loadbalancer
+          workflow: qa.yml
+          ref: 'main'  # O cualquier rama que desees para el flujo de trabajo 'qa.yml'
+          inputs: |
+            key1: value1
+            key2: value2
