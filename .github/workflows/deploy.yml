@@ -100,14 +100,3 @@ jobs:
             sudo chmod -R 755 /var/www/html
             sudo systemctl restart nginx
           EOF
-
-      # Paso 5: Disparar el flujo de trabajo 'qa.yml' en el repositorio
-      - name: Trigger QA workflow
-        uses: peter-evans/workflow-dispatch@v1
-        with:
-          repository: AlexandraN2001/loadbalancer
-          workflow: qa.yml
-          ref: 'main'  # O cualquier rama que desees para el flujo de trabajo 'qa.yml'
-          inputs: |
-            key1: value1
-            key2: value2
