@@ -31,8 +31,8 @@ jobs:
         run: |
           # Iterar sobre cada instancia de EC2
           for HOST_DNS in ${{ secrets.HOST_DNS_PROD_1 }} ${{ secrets.HOST_DNS_PROD_2 }} ${{ secrets.HOST_DNS_PROD_3 }} ${{ secrets.HOST_DNS_PROD_4 }}; do
-            # Ejecutar comandos en cada EC2
-            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$HOST_DNS << 'SCRIPT'
+            # Ejecutar comandos en cada EC2 directamente
+            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$HOST_DNS '
               # Instalar nginx y git si no están instalados
               if ! command -v nginx &> /dev/null; then
                 sudo dnf install nginx -y
@@ -59,5 +59,5 @@ jobs:
 
               # Reiniciar nginx para aplicar los cambios
               sudo systemctl restart nginx
-            SCRIPT
+            '
           done
