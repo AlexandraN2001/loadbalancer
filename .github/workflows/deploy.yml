@@ -29,6 +29,18 @@ jobs:
         run: |
           for host in $(echo "${{ secrets.HOST_DNS_PROD }}" | tr "," "\n"); do
             ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$host << 'EOF'
+              # Install nginx and git if not installed
+              if ! command -v nginx &> /dev/null; then
+                sudo dnf install nginx -y
+              fi
+              if ! command -v git &> /dev/null; then
+                sudo dnf install git -y
+              fi
+
+              # Ensure nginx is running
+              sudo systemctl start nginx
+              sudo systemctl enable nginx
+
               # Clone the repository if it doesn't exist
               cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git ${{ secrets.TARGET_DIR }}
               cd ${{ secrets.TARGET_DIR }}

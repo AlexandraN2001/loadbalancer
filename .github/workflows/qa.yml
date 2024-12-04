@@ -3,7 +3,7 @@ name: Deploy to EC2 (QA)
 on:
   push:
     branches:
-      - qa  # Se ejecutará cuando haya un push en la rama 'qa'.
+      - qa
 
 jobs:
   deploy:
@@ -30,18 +30,30 @@ jobs:
         run: |
           for host in $(echo "${{ secrets.HOST_DNS_QA }}" | tr "," "\n"); do
             ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$host << 'EOF'
-              # Install git and nginx if not already installed
-              sudo yum install -y git nginx
+              # Check and install required packages
+              if ! command -v git &> /dev/null; then
+                sudo dnf install -y git
+              fi
+              if ! command -v nginx &> /dev/null; then
+                sudo dnf install -y nginx
+              fi
+
+              # Ensure nginx is running and enabled
+              sudo systemctl start nginx
+              sudo systemctl enable nginx
 
               # Create target directory if it doesn't exist
               mkdir -p ${{ secrets.TARGET_DIR }}
 
               # Navigate to the target directory or clone the repository
-              cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git
-              cd loadbalancer
+              if [ ! -d "${{ secrets.TARGET_DIR }}/loadbalancer" ]; then
+                git clone https://github.com/AlexandraN2001/loadbalancer.git ${{ secrets.TARGET_DIR }}/loadbalancer
+              fi
+              cd ${{ secrets.TARGET_DIR }}/loadbalancer
 
               # Pull latest changes from the 'qa' branch
-              git pull origin qa
+              git fetch origin qa
+              git reset --hard origin/qa
 
               # Deploy the index.html to nginx's web root
               sudo cp index.html /usr/share/nginx/html/
