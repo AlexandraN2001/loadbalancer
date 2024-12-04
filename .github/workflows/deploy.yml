@@ -29,6 +29,7 @@ jobs:
       # Step 3: Deploy to each EC2 instance
       - name: Deploy to EC2 instances
         run: |
+          # Iterar sobre cada instancia de EC2
           for HOST_DNS in ${{ secrets.HOST_DNS_PROD_1 }} ${{ secrets.HOST_DNS_PROD_2 }} ${{ secrets.HOST_DNS_PROD_3 }} ${{ secrets.HOST_DNS_PROD_4 }}; do
             # Ejecutar comandos en cada EC2
             ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$HOST_DNS << 'SCRIPT'
