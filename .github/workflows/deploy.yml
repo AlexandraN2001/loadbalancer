@@ -20,16 +20,17 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY_PROD }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          # Adding hosts to known_hosts without using for
-          if [[ ! -z "${{ secrets.HOST_DNS_PROD }}" ]]; then
-            ssh-keyscan -H "${{ secrets.HOST_DNS_PROD }}" >> ~/.ssh/known_hosts
-          fi
 
-      # Step 3: Deploy to EC2 instances
+          # Add all EC2 host DNS addresses to known_hosts
+          for HOST_DNS in ${{ secrets.HOST_DNS_PROD_1 }} ${{ secrets.HOST_DNS_PROD_2 }} ${{ secrets.HOST_DNS_PROD_3 }} ${{ secrets.HOST_DNS_PROD_4 }}; do
+            ssh-keyscan -H "$HOST_DNS" >> ~/.ssh/known_hosts
+          done
+
+      # Step 3: Deploy to each EC2 instance
       - name: Deploy to EC2 instances
         run: |
-          if [[ ! -z "${{ secrets.HOST_DNS_PROD }}" ]]; then
-            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.HOST_DNS_PROD }} << 'EOF'
+          for HOST_DNS in ${{ secrets.HOST_DNS_PROD_1 }} ${{ secrets.HOST_DNS_PROD_2 }} ${{ secrets.HOST_DNS_PROD_3 }} ${{ secrets.HOST_DNS_PROD_4 }}; do
+            ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@$HOST_DNS << EOF
               # Install nginx and git if not installed
               if ! command -v nginx &> /dev/null; then
                 sudo dnf install nginx -y
@@ -55,4 +56,4 @@ jobs:
               # Restart nginx to apply the changes
               sudo systemctl restart nginx
             EOF
-          fi
+          done
