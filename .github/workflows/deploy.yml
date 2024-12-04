@@ -56,4 +56,3 @@ jobs:
               # Restart nginx to apply the changes
               sudo systemctl restart nginx
             EOF
-          done
