@@ -43,8 +43,8 @@ jobs:
 
               # Clone the repository if it doesn't exist
               cd ${{ secrets.TARGET_DIR }} || git clone https://github.com/AlexandraN2001/loadbalancer.git ${{ secrets.TARGET_DIR }}
-              cd ${{ secrets.TARGET_DIR}}
-              
+              cd ${{ secrets.TARGET_DIR }}
+
               # Pull the latest changes from the main branch
               git pull origin main
 
